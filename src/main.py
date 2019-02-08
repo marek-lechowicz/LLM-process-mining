@@ -7,24 +7,30 @@ m_tc = [
     [ 0,  0,  0,  0],
     [-1, -1,  1, -1],
     [-1, -1,  1, -1],
-    [ 1,  1, -1, -1]
+    [ 1,  1, -1, -1],
+    [-1, -1, -1,  0]
 ]
 
 m_te = [
     [-1, -1,  1, -1],
     [-1,  1, -1, -1],
     [ 1, -1, -1, -1],
+    [-1, -1, -1,  1],
     [-1, -1, -1,  1]
 ]
 
 m_st = [
     [ 1,  1,  1,  0],
-    [ 0,  1,  0,  0]
+    [ 0,  1,  0,  0],
+    [-1, -1, -1,  1]
 ]
 
+assert len(m_tc) == len(m_te)
+assert len(s_0) == len(m_tc[0]) == len(m_te[0]) == len(m_st[0])
 
-max_executions = 1
-tasks_count = 4
+
+max_executions = 2 
+tasks_count = 5
 data_entities_count = 4
 max_workflow_trace_count = tasks_count * max_executions # 3. The maximum length of the workflow trace
 
@@ -59,7 +65,7 @@ def change_state(i):
     state = process_states[i]
     next_state = process_states[i+1]
     effects = m_te_var[task]
-    x = Conjunction([
+    return Conjunction([
         # Equivalent of:
         # if ((effects[s] == -1) then 
         #   next_state[s] == state[s]
@@ -75,35 +81,22 @@ def change_state(i):
 
         for s in range(0, data_entities_count)
     ])
-    print(x)
-    return x
 
 model.add([change_state(i) for i in range(0, max_workflow_trace_count - 1)])
 
 # Helpers
 
 def state_satisfies_requirements(state, requirements):
-    # if len(state) != len(requirements):
-    #     print(state, len(state))
-    #     print(requirements, len(requirements))
-    #     print(requirements[0])
-    # assert len(state) == len(requirements)
     return Conjunction([ 
-        (state[s] == requirements[s]) | 
-        (requirements[s] == -1) 
+        (state[s] == requirements[s]) | (requirements[s] == -1) 
         for s in range(0, len(state))
     ])
 
 def state_satisfies_requirements_set(state, requirements_set):
-    # print(state, len(state))
-    # print(requirements_set, len(requirements_set))
-    # print(requirements_set[0])
-    x = Disjunction([
+    return Disjunction([
         state_satisfies_requirements(state, requirements_set[i])
         for i in range(0, len(requirements_set))
     ])
-    # print(x)
-    return x
 
 # 6. The process should end when the desired goal state is achieved.
 def process_should_end(i):
@@ -116,7 +109,7 @@ def process_should_end(i):
         (last_task_index < (i + 1))
     )
 
-# model.add([process_should_end(i) for i in range(0, max_workflow_trace_count)])
+model.add([process_should_end(i) for i in range(0, max_workflow_trace_count)])
 
 
 # 7. The last state of the process should satisfy one of the goal states.
@@ -134,9 +127,9 @@ def task_condition_check(i):
 
 model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
 
-solver = model.load('MiniSat')
+# solver = model.load('MiniSat')
 # solver = model.load('WalkSat')
-# solver = model.load('Mistral')
+solver = model.load('Mistral')
 
 solver.startNewSearch()
 
