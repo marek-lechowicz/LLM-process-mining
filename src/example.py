@@ -42,7 +42,7 @@ process_states = Matrix(max_workflow_trace_count, data_entities_count, -1, 2)
 
 last_task_index = Variable(max_workflow_trace_count)
 
-
+m_tc_var = Matrix(data_entities_count, tasks_count, -1, 2)
 
 
 model = Model()
@@ -59,11 +59,10 @@ def changeState(i):
     task = workflow_trace[i]
     state = process_states[i]
     next_state = process_states[i+1]
-    effects = VarArray(data_entities_count, -1, 2)
-    effects_constraints = [effects[s] == m_te_var[task, s] for s in range(0, data_entities_count)]
+    effects = [effects[s] == m_te_var[task, s] for s in range(0, data_entities_count)]
     [  for s in range(0, data_entities_count)]
 
-model.add([])
+model.add([changeState(i) for i in range(0, max_workflow_trace_count)])
 
 
 
