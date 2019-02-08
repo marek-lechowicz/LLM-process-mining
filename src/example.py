@@ -1,5 +1,17 @@
 from Numberjack import *
 
+def matrixElements(matrix_var, matrix):
+    assert len(matrix) == len(matrix_var)
+    assert len(matrix) > 0
+    assert len(matrix[0]) == len(matrix_var[0])
+
+    constraints = []
+
+    for i in range(0, len(matrix)):
+        for j in range(0, len(matrix[0])):
+            constraints.append(matrix_var[i][j] == matrix[i][j])
+    return constraints
+
 s_0 = [0, 0, 0, 0]
 
 m_tc = [
@@ -35,6 +47,8 @@ last_task_index = Variable(max_workflow_trace_count)
 
 model = Model()
 
+model.add(matrixElements(m_tc_var, m_tc))
+
 # No more than max_execution occurances of task in workflow trace
 model.add([Cardinality(workflow_trace, x) <= max_executions for x in range(1, tasks_count + 1)])
 
@@ -46,7 +60,7 @@ def changeState(i):
     state = process_states[i]
     next_state = process_states[i+1]
     effects = VarArray(data_entities_count, -1, 2)
-    effects_constraints = [effects[s] == m_te[task, s] for s in range(0, data_entities_count)]
+    effects_constraints = [effects[s] == m_te_var[task, s] for s in range(0, data_entities_count)]
     [  for s in range(0, data_entities_count)]
 
 model.add([])
