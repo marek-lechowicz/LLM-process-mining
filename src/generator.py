@@ -15,7 +15,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     m_tc = [[-1 for i in range(0, len(m_tc[0]))]] + m_tc
     m_te = [[-1 for i in range(0, len(m_te[0]))]] + m_te
 
-    max_executions = 1
+    max_executions = 2
     tasks_count = len(m_tc)
     data_entities_count = len(s_0)
     # 3. The maximum length of the workflow trace
@@ -97,7 +97,7 @@ def get_model(s_0, m_tc, m_te, m_st):
         return (
             # Implication as disjunction
             # p -> q <=> ~p \/ q
-            (not state_satisfies_requirements(state, m_st[0]))
+            (not state_satisfies_requirements_set(state, m_st))
             |
             (last_task_index < (i + 1))
         )
@@ -119,6 +119,14 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     model.add([task_condition_check(i)
                for i in range(0, max_workflow_trace_count)])
+
+    def last_index_constraint(i):
+        trace = workflow_trace[i]
+        (trace != 0) | Conjunction(
+            [workflow_trace == 0 for j in range(i + 1, max_workflow_trace_count)])
+
+    model.add([last_index_constraint(i)
+               for i in range(1, max_workflow_trace_count)])
 
     return (
         model,
