@@ -12,8 +12,8 @@ def get_model(s_0, m_tc, m_te, m_st):
         assert len(row) == len(s_0)
 
     # Add dummy task at '0' position
-    m_tc = [-1 for i in range(0, len(m_tc[0]))] + m_tc
-    m_te = [-1 for i in range(0, len(m_te[0]))] + m_te
+    m_tc = [[-1 for i in range(0, len(m_tc[0]))]] + m_tc
+    m_te = [[-1 for i in range(0, len(m_te[0]))]] + m_te
 
     max_executions = 1
     tasks_count = len(m_tc)
@@ -29,7 +29,6 @@ def get_model(s_0, m_tc, m_te, m_st):
     last_task_index = Variable(max_workflow_trace_count)
 
     model = Model()
-
 
     # As we want to use m_tc and m_te rows selected by variable we have to
     # create variable matrix (m_tc_var, m_te_var) and bind it's elements
@@ -77,8 +76,8 @@ def get_model(s_0, m_tc, m_te, m_st):
     model.add([change_state(i)
                for i in range(0, max_workflow_trace_count - 1)])
 
-
     # Helpers
+
     def state_satisfies_requirements(state, requirements):
         return Conjunction([
             (state[s] == requirements[s]) | (requirements[s] == -1)
@@ -91,8 +90,8 @@ def get_model(s_0, m_tc, m_te, m_st):
             for i in range(0, len(requirements_set))
         ])
 
-
     # 6. The process should end when the desired goal state is achieved.
+
     def process_should_end(i):
         state = process_states[i]
         return (
@@ -106,13 +105,12 @@ def get_model(s_0, m_tc, m_te, m_st):
     model.add([process_should_end(i)
                for i in range(0, max_workflow_trace_count)])
 
-
     # 7. The last state of the process should satisfy one of the goal states.
     last_state = process_states[max_workflow_trace_count - 1]
     model.add(state_satisfies_requirements_set(last_state, m_st))
 
-
     # 8. A task can be executed only if the current state satisfies its input conditions.
+
     def task_condition_check(i):
         task = workflow_trace[i]
         state = process_states[i]
