@@ -11,6 +11,10 @@ def get_model(s_0, m_tc, m_te, m_st):
     for row in m_st:
         assert len(row) == len(s_0)
 
+    # Add dummy task at '0' position
+    m_tc = [-1 for i in range(0, len(m_tc[0]))] + m_tc
+    m_te = [-1 for i in range(0, len(m_te[0]))] + m_te
+
     max_executions = 1
     tasks_count = len(m_tc)
     data_entities_count = len(s_0)
@@ -35,20 +39,19 @@ def get_model(s_0, m_tc, m_te, m_st):
     model.add(matrixElements(m_tc_var, m_tc))
     model.add(matrixElements(m_te_var, m_te))
 
-
     # 2. No more than max_execution occurances of task in workflow trace
+    #    (apart from dummy '0' task)
     model.add([
         Cardinality(workflow_trace, x) <= max_executions
-        for x in range(0, tasks_count)])
-
+        for x in range(1, tasks_count)])
 
     # 4. The input state of the first executed task should be equal to s_0
     model.add([
         process_states[0, i] == s_0[i]
         for i in range(0, data_entities_count)])
 
-
     # 5. Every non-empty task should change the current state.
+
     def change_state(i):
         task = workflow_trace[i]
         state = process_states[i]
