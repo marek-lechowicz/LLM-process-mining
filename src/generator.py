@@ -95,15 +95,30 @@ def get_model(s_0, m_tc, m_te, m_st):
     def process_should_end(i):
         state = process_states[i]
         return (
-            # Implication as disjunction
-            # p -> q <=> ~p \/ q
-            (not state_satisfies_requirements_set(state, m_st))
-            |
-            (last_task_index < (i + 1))
+#            # Implication as disjunction
+#            # p -> q <=> ~p \/ q
+#            (
+#                (not state_satisfies_requirements_set(state, m_st))
+#                |
+#                (    
+#                   (last_task_index < i + 2) 
+#                   &
+#                    (workflow_trace[i] == 0) 
+#                )
+#            )
+#            &
+            (
+                (workflow_trace[i] != 0)
+                |
+                (state_satisfies_requirements_set(state, m_st))
+            )
         )
 
     model.add([process_should_end(i)
-               for i in range(0, max_workflow_trace_count)])
+               for i in range(0, max_workflow_trace_count - 1)])
+
+    # Last task in workflow trace shoud be dummy task
+    model.add(workflow_trace[last_task_index] == 0)
 
     # 7. The last state of the process should satisfy one of the goal states.
     last_state = process_states[max_workflow_trace_count - 1]
@@ -124,9 +139,11 @@ def get_model(s_0, m_tc, m_te, m_st):
         trace = workflow_trace[i]
         return (trace != 0) | Conjunction(
             [workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])
+        
+#    model.add([last_index_constraint(i)
+#               for i in range(1, max_workflow_trace_count - 1)])
 
-    model.add([last_index_constraint(i)
-               for i in range(1, max_workflow_trace_count - 1)])
+    print(model)
 
     return (
         model,
