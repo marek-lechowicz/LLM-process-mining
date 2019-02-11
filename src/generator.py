@@ -110,4 +110,9 @@ def get_model(s_0, m_tc, m_te, m_st):
     model.add([task_condition_check(i)
                for i in range(0, max_workflow_trace_count)])
 
-    return model
+    return (
+        model,
+        workflow_trace,
+        process_states,
+        last_task_index
+    )
