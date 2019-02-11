@@ -48,4 +48,12 @@ def read_input_file(file_name):
         m_te = read_matrix()
         m_st = read_matrix()
 
+        assert len(m_tc) == len(m_te)
+        for row in m_tc:
+            assert len(row) == len(s_0)
+        for row in m_te:
+            assert len(row) == len(s_0)
+        for row in m_st:
+            assert len(row) == len(s_0)
+
         return (s_0, m_tc, m_te, m_st)

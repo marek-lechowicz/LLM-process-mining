@@ -4,7 +4,12 @@ from utilities import *
 
 def get_model(s_0, m_tc, m_te, m_st):
     assert len(m_tc) == len(m_te)
-    assert len(s_0) == len(m_tc[0]) == len(m_te[0]) == len(m_st[0])
+    for row in m_tc:
+        assert len(row) == len(s_0)
+    for row in m_te:
+        assert len(row) == len(s_0)
+    for row in m_st:
+        assert len(row) == len(s_0)
 
     max_executions = 1
     tasks_count = len(m_tc)
