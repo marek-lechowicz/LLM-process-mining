@@ -1,16 +1,5 @@
 from Numberjack import *
-
-def matrixElements(matrix_var, matrix):
-    assert len(matrix) == len(matrix_var)
-    assert len(matrix) > 0
-    assert len(matrix[0]) == len(matrix_var[0])
-
-    constraints = []
-
-    for i in range(0, len(matrix)):
-        for j in range(0, len(matrix[0])):
-            constraints.append(matrix_var[i][j] == matrix[i][j])
-    return constraints
+from utilities import *
 
 s_0 = [0, 0, 0, 0]
 
@@ -75,23 +64,14 @@ def change_state(i):
         # if ((effects[s] == -1) then 
         #   next_state[s] == state[s]
         # else 
-        #   next_state[s] == effects[s]
+        #   next_state[s] == effects[s]  
+        # 
+        # Implication as disjunction
+        # p -> q <=> ~p \/ q      
         
-        
-        # ((effects[s] == -1) and (next_state[s] == state[s])) 
-        # or
-        # ((effects[s] != -1) and (next_state[s] == effects[s]))
-
-
-        # ((effects[s] != -1) or (next_state[s] == state[s]))
-        # and
-        # ((effects[s] ==  -1) or (next_state[s] == effects[s]))
-
-        ((not (effects[s] == -1)) or (next_state[s] == state[s]))
-        and
-        ((not (effects[s] != -1)) or (next_state[s] == effects[s]))
-
-        # next_state[s] == effects[s]
+        ((effects[s] != -1) | (next_state[s] == state[s]))
+        &
+        ((effects[s] ==  -1) | (next_state[s] == effects[s]))
 
         for s in range(0, data_entities_count)
     ])
@@ -109,7 +89,7 @@ def state_satisfies_requirements(state, requirements):
     #     print(requirements[0])
     # assert len(state) == len(requirements)
     return Conjunction([ 
-        (state[s] == requirements[s]) or 
+        (state[s] == requirements[s]) | 
         (requirements[s] == -1) 
         for s in range(0, len(state))
     ])
@@ -132,7 +112,7 @@ def process_should_end(i):
         # Implication as disjunction
         # p -> q <=> ~p \/ q
         (not state_satisfies_requirements(state, m_st[0]))
-        or 
+        | 
         (last_task_index < (i + 1))
     )
 
@@ -152,25 +132,17 @@ def task_condition_check(i):
     conditions = m_tc_var[task]
     return state_satisfies_requirements(state, conditions)
 
-model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count - 1)])
+model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
 
-# solver = model.load('MiniSat')
+solver = model.load('MiniSat')
 # solver = model.load('WalkSat')
-solver = model.load('Mistral')
+# solver = model.load('Mistral')
 
 solver.startNewSearch()
 
 solution_count = 0
 
 solutions = []
-
-def VarArray_to_list(var_array):
-    return [x.get_value() for x in var_array]
-
-def Matrix_to_list(matrix):
-    return [VarArray_to_list(row) for row in matrix]
-
-
 
 while solver.getNextSolution() == SAT:
     solution_count += 1
@@ -182,16 +154,3 @@ while solver.getNextSolution() == SAT:
 
 
 print(f'Solutions: {solution_count}')
-
-
-
-# for s in solutions:
-#     workflow_trace = s[0]
-#     states = s[1]
-#     for i in range(0, len(workflow_trace)):
-#         trace = workflow_trace[i]
-#         for j in range(0, len(states[i])):
-#             if m_tcs[1][]
-
-
-# print(state_satisfies_requirements_set(VarArray(2, 2), [[0,0],[0,1]]))
