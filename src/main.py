@@ -1,6 +1,6 @@
 from Numberjack import *
 from utilities import *
-from generator import *
+from workflow_generator import *
 from read_input_file import *
 
 s_0, m_tc, m_te, m_st = read_input_file('problems//working.txt')
