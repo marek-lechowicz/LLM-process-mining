@@ -1,30 +1,9 @@
 from Numberjack import *
 from utilities import *
 from generator import *
+from read_input_file import *
 
-s_0 = [0, 0, 0, 0]
-
-m_tc = [
-    [0,  0,  0,  0],
-    [-1, -1,  1, -1],
-    [-1, -1,  1, -1],
-    [1,  1, -1, -1],
-#    [-1, -1, -1,  0]
-]
-
-m_te = [
-    [-1, -1,  1, -1],
-    [-1,  1, -1, -1],
-    [1, -1, -1, -1],
-    [-1, -1, -1,  1],
-#    [-1, -1, -1,  1]
-]
-
-m_st = [
-    [1,  1,  1,  0],
-#    [0,  1,  0,  0],
-#    [-1, -1, -1,  1]
-]
+s_0, m_tc, m_te, m_st = read_input_file('problems\working.txt')
 
 model, workflow_trace, process_states, last_task_index = get_model(
     s_0, m_tc, m_te, m_st)
