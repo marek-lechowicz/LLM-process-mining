@@ -1,7 +1,7 @@
 from Numberjack import *
 
 
-array = VarArray(5, 6)
+array = VarArray(5, 8)
 
 m = [
     [0, 1, 2, 3, 4],
