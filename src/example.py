@@ -55,18 +55,22 @@ model.add(matrixElements(m_tc_var, m_tc))
 model.add(matrixElements(m_te_var, m_te))
 
 # 2. No more than max_execution occurances of task in workflow trace
-model.add([Cardinality(workflow_trace, x) <= max_executions for x in range(0, tasks_count)])
+model.add([
+    Cardinality(workflow_trace, x) <= max_executions 
+    for x in range(0, tasks_count)])
 
 # 4. The input state of the first executed task should be equal to s_0
-model.add([process_states[0, i] == s_0[i] for i in range(0, data_entities_count)])
+model.add([
+    process_states[0, i] == s_0[i] 
+    for i in range(0, data_entities_count)])
 
 # 5. Every non-empty task should change the current state.
-def changeState(i):
+def change_state(i):
     task = workflow_trace[i]
     state = process_states[i]
     next_state = process_states[i+1]
     effects = m_te_var[task]
-    return Conjunction([
+    x = Conjunction([
         # Equivalent of:
         # if ((effects[s] == -1) then 
         #   next_state[s] == state[s]
@@ -91,6 +95,8 @@ def changeState(i):
 
         for s in range(0, data_entities_count)
     ])
+    print(x)
+    return x
 
 # model.add([changeState(i) for i in range(0, max_workflow_trace_count - 1)])
 
@@ -135,7 +141,7 @@ def process_should_end(i):
 
 # 7. The last state of the process should satisfy one of the goal states.
 last_state = process_states[max_workflow_trace_count - 1]
-model.add(state_satisfies_requirements_set(last_state, m_st))
+# model.add(state_satisfies_requirements_set(last_state, m_st))
 
 
 # 8. A task can be executed only if the current state satisfies its input conditions.
@@ -146,7 +152,7 @@ def task_condition_check(i):
     conditions = m_tc_var[task]
     return state_satisfies_requirements(state, conditions)
 
-model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
+# model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
 
 solver = model.load('MiniSat')
 
