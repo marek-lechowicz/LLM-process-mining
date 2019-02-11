@@ -19,7 +19,7 @@ def read_input_file(file_name):
                     continue
 
                 idx += 1
-                return [x.strip() for x in line.split(',')]
+                return [int(x.strip()) for x in line.split(',')]
 
         def read_matrix():
             nonlocal idx
@@ -40,7 +40,7 @@ def read_input_file(file_name):
                         continue
 
                 idx += 1
-                result.append([x.strip() for x in line.split(',')])
+                result.append([int(x.strip()) for x in line.split(',')])
             return result
 
         s_0 = read_line()
