@@ -122,11 +122,11 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     def last_index_constraint(i):
         trace = workflow_trace[i]
-        (trace != 0) | Conjunction(
-            [workflow_trace == 0 for j in range(i + 1, max_workflow_trace_count)])
+        return (trace != 0) | Conjunction(
+            [workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])
 
     model.add([last_index_constraint(i)
-               for i in range(1, max_workflow_trace_count)])
+               for i in range(1, max_workflow_trace_count - 1)])
 
     return (
         model,

@@ -3,7 +3,7 @@ from utilities import *
 from generator import *
 from read_input_file import *
 
-s_0, m_tc, m_te, m_st = read_input_file('problems\working.txt')
+s_0, m_tc, m_te, m_st = read_input_file('problems//working.txt')
 
 print('Initial state:')
 print(s_0)
