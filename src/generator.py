@@ -15,7 +15,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     m_tc = [[-1 for i in range(0, len(m_tc[0]))]] + m_tc
     m_te = [[-1 for i in range(0, len(m_te[0]))]] + m_te
 
-    max_executions = 2
+    max_executions = 4
     tasks_count = len(m_tc)
     data_entities_count = len(s_0)
     # 3. The maximum length of the workflow trace
@@ -94,31 +94,23 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     def process_should_end(i):
         state = process_states[i]
-        return (
-#            # Implication as disjunction
-#            # p -> q <=> ~p \/ q
-#            (
-#                (not state_satisfies_requirements_set(state, m_st))
-#                |
-#                (    
-#                   (last_task_index < i + 2) 
-#                   &
-#                    (workflow_trace[i] == 0) 
-#                )
-#            )
-#            &
-            (
-                (workflow_trace[i] != 0)
-                |
-                (state_satisfies_requirements_set(state, m_st))
-            )
-        )
-
+        return state_satisfies_requirements_set(state, m_st) == (workflow_trace[i] == 0)
+                
     model.add([process_should_end(i)
-               for i in range(0, max_workflow_trace_count - 1)])
+               for i in range(0, max_workflow_trace_count)])
 
     # Last task in workflow trace shoud be dummy task
     model.add(workflow_trace[last_task_index] == 0)
+
+    def prepending_non_zero(i):
+        return Conjunction([
+            workflow_trace[j] != 0
+            for j in range(0, i)
+        ])
+    # model.add([ 
+    #     (last_task_index == i) == (prepending_non_zero(i)) 
+    #     for i in range(1, max_workflow_trace_count)
+    # ])
 
     # 7. The last state of the process should satisfy one of the goal states.
     last_state = process_states[max_workflow_trace_count - 1]
@@ -137,13 +129,13 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     def last_index_constraint(i):
         trace = workflow_trace[i]
+        # if trace == 0:
+        #   Conjunction([workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])  
         return (trace != 0) | Conjunction(
             [workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])
         
-#    model.add([last_index_constraint(i)
-#               for i in range(1, max_workflow_trace_count - 1)])
-
-    print(model)
+    # model.add([last_index_constraint(i)
+    #            for i in range(0, max_workflow_trace_count - 1)])
 
     return (
         model,
