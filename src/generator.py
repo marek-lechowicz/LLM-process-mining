@@ -6,7 +6,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     assert len(m_tc) == len(m_te)
     assert len(s_0) == len(m_tc[0]) == len(m_te[0]) == len(m_st[0])
 
-    max_executions = 2
+    max_executions = 1
     tasks_count = len(m_tc)
     data_entities_count = len(s_0)
     # 3. The maximum length of the workflow trace
@@ -97,7 +97,7 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     # 7. The last state of the process should satisfy one of the goal states.
     last_state = process_states[max_workflow_trace_count - 1]
-    # model.add(state_satisfies_requirements_set(last_state, m_st))
+    model.add(state_satisfies_requirements_set(last_state, m_st))
 
     # 8. A task can be executed only if the current state satisfies its input conditions.
 
