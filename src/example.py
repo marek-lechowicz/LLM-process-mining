@@ -41,12 +41,12 @@ max_workflow_trace_count = tasks_count * max_executions # 3. The maximum length 
 
 # decision variables
 workflow_trace = VarArray(max_workflow_trace_count, tasks_count, 'task')
-process_states = Matrix(max_workflow_trace_count, data_entities_count, -1, 1)
+process_states = Matrix(max_workflow_trace_count, data_entities_count, -1, 1, 'state')
 
 last_task_index = Variable(max_workflow_trace_count)
 
-m_tc_var = Matrix(tasks_count, data_entities_count, -1, 1)
-m_te_var = Matrix(tasks_count, data_entities_count, -1, 1)
+m_tc_var = Matrix(tasks_count, data_entities_count, -1, 1, 'm_tc')
+m_te_var = Matrix(tasks_count, data_entities_count, -1, 1, 'm_te')
 
 
 model = Model()
@@ -87,9 +87,9 @@ def change_state(i):
         # and
         # ((effects[s] ==  -1) or (next_state[s] == effects[s]))
 
-        (not (effects[s] == -1) or (next_state[s] == state[s]))
+        ((not (effects[s] == -1)) or (next_state[s] == state[s]))
         and
-        (not (effects[s] != -1) or (next_state[s] == effects[s]))
+        ((not (effects[s] != -1)) or (next_state[s] == effects[s]))
 
         # next_state[s] == effects[s]
 
@@ -98,16 +98,16 @@ def change_state(i):
     print(x)
     return x
 
-# model.add([changeState(i) for i in range(0, max_workflow_trace_count - 1)])
+model.add([change_state(i) for i in range(0, max_workflow_trace_count - 1)])
 
 # Helpers
 
 def state_satisfies_requirements(state, requirements):
-    if len(state) != len(requirements):
-        print(state, len(state))
-        print(requirements, len(requirements))
-        print(requirements[0])
-    assert len(state) == len(requirements)
+    # if len(state) != len(requirements):
+    #     print(state, len(state))
+    #     print(requirements, len(requirements))
+    #     print(requirements[0])
+    # assert len(state) == len(requirements)
     return Conjunction([ 
         (state[s] == requirements[s]) or 
         (requirements[s] == -1) 
@@ -115,14 +115,14 @@ def state_satisfies_requirements(state, requirements):
     ])
 
 def state_satisfies_requirements_set(state, requirements_set):
-    print(state, len(state))
-    print(requirements_set, len(requirements_set))
-    print(requirements_set[0])
+    # print(state, len(state))
+    # print(requirements_set, len(requirements_set))
+    # print(requirements_set[0])
     x = Disjunction([
         state_satisfies_requirements(state, requirements_set[i])
         for i in range(0, len(requirements_set))
     ])
-    print(x)
+    # print(x)
     return x
 
 # 6. The process should end when the desired goal state is achieved.
@@ -152,9 +152,11 @@ def task_condition_check(i):
     conditions = m_tc_var[task]
     return state_satisfies_requirements(state, conditions)
 
-# model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
+model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count - 1)])
 
-solver = model.load('MiniSat')
+# solver = model.load('MiniSat')
+# solver = model.load('WalkSat')
+solver = model.load('Mistral')
 
 solver.startNewSearch()
 
