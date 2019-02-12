@@ -4,6 +4,7 @@ from Numberjack import *
 from utilities import *
 from workflow_generator import *
 from read_input_file import *
+from pyprom import alpha
 
 
 def process_file(input_file):
@@ -11,7 +12,7 @@ def process_file(input_file):
     print()
     s_0, m_tc, m_te, m_st = read_input_file(input_file)
 
-    traces = process(s_0, m_tc, m_te, m_st)
+    log = process(s_0, m_tc, m_te, m_st)
 
     if not exists('solutions'):
         makedirs('solutions')
@@ -22,9 +23,11 @@ def process_file(input_file):
     output_file_name = join('solutions', name + '_out.txt')
 
     with open(output_file_name, 'w+') as file:
-        for trace in traces:
+        for trace in log:
             file.write(trace)
             file.write('\n')
+
+    alpha.apply(log, '', join('solutions', name))
 
 
 def process(s_0, m_tc, m_te, m_st):
@@ -66,18 +69,18 @@ def process(s_0, m_tc, m_te, m_st):
     print('==========================================================')
     print()
 
-    traces = []
+    log = []
     for s in solutions:
         trace, _, last = s
         trace = trace[0:last]
         trace = ' '.join(map(lambda x: chr(64 + x), trace))
-        traces.append(trace)
+        log.append(trace)
         print(trace)
 
     print()
     print()
 
-    return traces
+    return log
 
 
 if __name__ == "__main__":
