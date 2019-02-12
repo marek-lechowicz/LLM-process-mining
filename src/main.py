@@ -22,7 +22,6 @@ def process_file(input_file):
     output_file_name = join('solutions', name + '_out.txt')
 
     with open(output_file_name, 'w+') as file:
-        traces = []
         for trace in traces:
             file.write(trace)
             file.write('\n')
