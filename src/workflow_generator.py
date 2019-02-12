@@ -15,18 +15,16 @@ def get_model(s_0, m_tc, m_te, m_st):
     m_tc = [[-1 for i in range(0, len(m_tc[0]))]] + m_tc
     m_te = [[-1 for i in range(0, len(m_te[0]))]] + m_te
 
-    max_executions = 4
+    max_executions = 2
     tasks_count = len(m_tc)
     data_entities_count = len(s_0)
-    # 3. The maximum length of the workflow trace
     max_workflow_trace_count = tasks_count * max_executions
 
-    # variables
     workflow_trace = VarArray(max_workflow_trace_count, tasks_count, 'task')
     process_states = Matrix(max_workflow_trace_count,
                             data_entities_count, 0, 1, 'state')
 
-    last_task_index = Variable(max_workflow_trace_count)
+    last_task_index = Variable(max_workflow_trace_count, 'last_task_index')
 
     model = Model()
 
@@ -55,7 +53,7 @@ def get_model(s_0, m_tc, m_te, m_st):
 
 
     # Tasks should not repeat
-    # model.add(AllDiffExcept0(workflow_trace))
+    # model.add(AllDiffExcept0(workflow_trace)) 
 
 
     # Count of occurences for each task should be lower or equal to max_executions
@@ -73,7 +71,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     # Last task in workflow trace shoud be dummy task
     # constraint process[last_process_index] = dummy_task;
 
-    model.add(workflow_trace[last_task_index] == 0)
+    model.add(workflow_trace[max_workflow_trace_count - 1] == 0)
 
 
     # First state should be equal to the defined state
@@ -93,15 +91,19 @@ def get_model(s_0, m_tc, m_te, m_st):
     #   else process[i] != dummy_task endif
     # );
 
-    def prepending_non_zero(i):
-        return Conjunction([
-            workflow_trace[j] != 0
-            for j in range(0, i)
-        ])
-    # model.add([ 
-    #     (last_task_index == i) == (prepending_non_zero(i)) 
-    #     for i in range(1, max_workflow_trace_count)
-    # ])
+    def constraint_idle_tasks(i):
+        return (
+            (last_task_index < i) == (workflow_trace[i] == 0)
+            
+            # ( (i <= last_task_index) | (workflow_trace[i] == 0) )
+            # &
+            # ( (i > last_task_index) | (workflow_trace[i] != 0) )
+        )
+
+    model.add([
+        constraint_idle_tasks(i)
+        for i in range(0, max_workflow_trace_count)
+    ])
 
 
     # End process when the first (desired) goal is achieved - REVISED 2 times for short processes
@@ -111,8 +113,11 @@ def get_model(s_0, m_tc, m_te, m_st):
     #   } in
     #   state_satisfies_requirements(state, row(goal_states,1)) ->last_task_index < i+2 %corrected to i+2
     # );
+    # UWAGA: row(goal_states,1) wybiera jeden wiersz(?), czy nie powinna być tutaj przekazana cała macierz
+    # dozwolonych stanów końcowych?
 
     # 6. The process should end when the desired goal state is achieved.
+    # state_satisfies_requirements_set <=> (trace == 0)
 
     def process_should_end(i):
         state = process_states[i]
@@ -130,6 +135,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     #      process_states[i, s] == process_states[i-1, s]
     #   )
     # );
+    # UWAGA: jak na razie z empirycznych testóœ wychodzi, że to ograniczenie jest nadmiarowe
 
     def last_index_constraint(i):
         trace = workflow_trace[i]
