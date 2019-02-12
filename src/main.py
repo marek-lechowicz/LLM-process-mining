@@ -5,11 +5,30 @@ from utilities import *
 from workflow_generator import *
 from read_input_file import *
 
+
 def process_file(input_file):
     print(f'Processing file {input_file}')
     print()
     s_0, m_tc, m_te, m_st = read_input_file(input_file)
 
+    traces = process(s_0, m_tc, m_te, m_st)
+
+    if not exists('solutions'):
+        makedirs('solutions')
+
+    base = basename(input_file)
+    name = splitext(base)[0]
+
+    output_file_name = join('solutions', name + '_out.txt')
+
+    with open(output_file_name, 'w+') as file:
+        traces = []
+        for trace in traces:
+            file.write(trace)
+            file.write('\n')
+
+
+def process(s_0, m_tc, m_te, m_st):
     print('Initial state:')
     print(s_0)
     print('Task conditions:')
@@ -23,21 +42,17 @@ def process_file(input_file):
     model, workflow_trace, process_states, last_task_index = get_model(
         s_0, m_tc, m_te, m_st)
 
-
     # solver = model.load('MiniSat')
     # solver = model.load('WalkSat')
     solver = model.load('Mistral')
 
     solver.startNewSearch()
 
-    solution_count = 0
-
     solutions = []
 
     print('Solutions:')
     print('==========')
     while solver.getNextSolution() == SAT:
-        solution_count += 1
         print(workflow_trace)
         print(process_states)
         print(last_task_index)
@@ -48,29 +63,24 @@ def process_file(input_file):
         print('----------')
 
     print()
-    print(f'Solutions count: {solution_count}')
+    print(f'Solutions count: {len(solutions)}')
     print('==========================================================')
     print()
+
+    traces = []
+    for s in solutions:
+        trace, _, last = s
+        trace = trace[0:last]
+        trace = ' '.join(map(lambda x: chr(64 + x), trace))
+        traces.append(trace)
+        print(trace)
+
+    print()
     print()
 
+    return traces
 
-    if not exists('solutions'):
-        makedirs('solutions')
 
-    base = basename(input_file)
-    name = splitext(base)[0]
-
-    output_file_name = join('solutions', name + '_out.txt')
-
-    with open(output_file_name, 'w+') as file:
-        traces = []
-        for s in solutions:
-            trace, _, last = s
-            trace = trace[0:last]
-            trace = ' '.join(map(lambda x: chr(64 + x), trace))
-            print(trace)
-            file.write(trace)
-            file.write('\n')
-
-for file in listdir('problems'):
-    process_file(join('problems', file))
+if __name__ == "__main__":
+    for file in listdir('problems'):
+        process_file(join('problems', file))
