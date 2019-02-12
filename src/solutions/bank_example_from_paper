@@ -2,16 +2,11 @@ digraph {
 	rankdir=LR
 	start
 	end
-	B -> "(('B',), ('D',))"
-	B [shape=box]
-	"(('B',), ('D',))" [shape=circle]
-	"(('B',), ('D',))" -> D
-	D [shape=box]
-	C -> "(('C',), ('D',))"
+	C -> "(('C',), ('B',))"
 	C [shape=box]
-	"(('C',), ('D',))" [shape=circle]
-	"(('C',), ('D',))" -> D
-	D [shape=box]
+	"(('C',), ('B',))" [shape=circle]
+	"(('C',), ('B',))" -> B
+	B [shape=box]
 	A -> "(('A',), ('B',))"
 	A [shape=box]
 	"(('A',), ('B',))" [shape=circle]
@@ -23,5 +18,5 @@ digraph {
 	"(('A',), ('C',))" -> C
 	C [shape=box]
 	start -> A
-	D -> end
+	B -> end
 }
