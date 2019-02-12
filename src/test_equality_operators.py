@@ -6,8 +6,7 @@ def test(constraint):
 
     model = Model()
     constr = constraint(x, y)
-    # model.add(constr)
-    model.add((x == 0 ) == (y == 1))
+    model.add(constr)
 
     print(constr)
     print(model)
@@ -25,5 +24,6 @@ def test(constraint):
 test(lambda x, y: x == y)
 test(lambda x, y: x != y)
 test(lambda x, y: Ne([x, y]))
-test(lambda x, y: Neg(x))
+# test(lambda x, y: Neg(x))
 test(lambda x, y: -(x == y))
+test(lambda x, y: (x == 0) == (y == 1))
