@@ -113,6 +113,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     #   } in
     #   state_satisfies_requirements(state, row(goal_states,1)) ->last_task_index < i+2 %corrected to i+2
     # );
+    #
     # UWAGA: row(goal_states,1) wybiera jeden wiersz(?), czy nie powinna być tutaj przekazana cała macierz
     # dozwolonych stanów końcowych?
 
@@ -135,7 +136,7 @@ def get_model(s_0, m_tc, m_te, m_st):
     #      process_states[i, s] == process_states[i-1, s]
     #   )
     # );
-    # UWAGA: jak na razie z empirycznych testóœ wychodzi, że to ograniczenie jest nadmiarowe
+    # UWAGA: jak na razie z empirycznych testów wychodzi, że to ograniczenie jest nadmiarowe
 
     def last_index_constraint(i):
         trace = workflow_trace[i]

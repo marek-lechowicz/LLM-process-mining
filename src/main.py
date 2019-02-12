@@ -44,8 +44,7 @@ def process(s_0, m_tc, m_te, m_st):
     model, workflow_trace, process_states, last_task_index = get_model(
         s_0, m_tc, m_te, m_st)
 
-    # solver = model.load('MiniSat')
-    # solver = model.load('WalkSat')
+    # solver = model.load('Gecode')
     solver = model.load('Mistral')
 
     solver.startNewSearch()
