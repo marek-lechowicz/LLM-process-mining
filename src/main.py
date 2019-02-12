@@ -24,7 +24,7 @@ def process_file(input_file):
 
     with open(output_file_name, 'w+') as file:
         for trace in log:
-            file.write(trace)
+            file.write(' '.join(trace))
             file.write('\n')
 
     alpha.apply(log, '', join('solutions', name))
@@ -73,7 +73,7 @@ def process(s_0, m_tc, m_te, m_st):
     for s in solutions:
         trace, _, last = s
         trace = trace[0:last]
-        trace = ' '.join(map(lambda x: chr(64 + x), trace))
+        trace = list(map(lambda x: chr(64 + x), trace))
         log.append(trace)
         print(trace)
 
