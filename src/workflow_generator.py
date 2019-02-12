@@ -53,7 +53,7 @@ def get_model(s_0, m_tc, m_te, m_st):
 
 
     # Tasks should not repeat
-    # model.add(AllDiffExcept0(workflow_trace)) 
+    model.add(AllDiffExcept0(workflow_trace)) 
 
 
     # Count of occurences for each task should be lower or equal to max_executions
@@ -93,7 +93,7 @@ def get_model(s_0, m_tc, m_te, m_st):
 
     def constraint_idle_tasks(i):
         return (
-            (last_task_index < i) == (workflow_trace[i] == 0)
+            (last_task_index <= i) == (workflow_trace[i] == 0)
             
             # ( (i <= last_task_index) | (workflow_trace[i] == 0) )
             # &
