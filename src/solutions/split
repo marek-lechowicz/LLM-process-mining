@@ -1,0 +1,17 @@
+digraph {
+	rankdir=LR
+	start
+	end
+	" " -> "((' ',), ('D',))"
+	" " [shape=box]
+	"((' ',), ('D',))" [shape=circle]
+	"((' ',), ('D',))" -> D
+	D [shape=box]
+	A -> "(('A',), (' ',))"
+	A [shape=box]
+	"(('A',), (' ',))" [shape=circle]
+	"(('A',), (' ',))" -> " "
+	" " [shape=box]
+	start -> A
+	D -> end
+}
