@@ -31,6 +31,8 @@ def apply(log, input_file, output_file):
 
     build_petrinet(tl, yl, ti, to, output_file)
 
+    return cs, df
+
 
 def build_ordering_relations(log):
     tl = set([item for sub in log for item in sub])

@@ -5,6 +5,7 @@ from utilities import *
 from workflow_generator import *
 from read_input_file import *
 from pyprom import alpha
+from bpmn_generator import build_bpmn
 
 
 def process_file(input_file):
@@ -27,7 +28,32 @@ def process_file(input_file):
             file.write(' '.join(trace))
             file.write('\n')
 
-    alpha.apply(log, '', join('solutions', name))
+    cs, df = alpha.apply(log, '', join('solutions', name))
+
+    causalities = dict()
+    direct_followers = dict()
+
+    for c in cs:
+        if c[0] not in causalities:
+            causalities[c[0]] = set([c[1]])
+        else:
+            causalities[c[0]].add(c[1])
+    
+    for f in df:
+        if f[0] not in direct_followers:
+            direct_followers[f[0]] = set([f[1]])
+        else:
+            direct_followers[f[0]].add(f[1])
+
+    print(causalities)
+    print(direct_followers)
+
+    graph = build_bpmn(direct_followers, causalities)
+    graph.render(
+        filename=name + '_bpmn',
+        directory='solutions',
+        format='png'
+        )
 
 
 def process(s_0, m_tc, m_te, m_st):
