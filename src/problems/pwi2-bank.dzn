@@ -1,0 +1,69 @@
+input_states_names = ["Name", "Surname", "PESEL", "CustomerID", "CustomerHistory", "CustomerType", "CustomerPreference", "ValidatedSelection", "AccountID", "Deposit", "DepositSentFlag", "AccountDetails", "CustomerInformation", "OpeningDate", "CustomerConfirmation", "StatusReviewDate", "AccountStatus", "CustomerIDConfirmationFlag", "AccountCreatedFlag"]; 
+% order is significant! Indexes are later used in the following arrays.
+input_tasks_names = ["Get Customer Coordinates", "Retrieve Customer Information", "Analyze Customer Relation", "Build Customer Profile", "Identify Customer Account Selection", "Select Account Type", "Check Deposit", "Register Deposit", "Prepare Account Opening Document", "Record Customer Information", "Propose Account Opening", "Schedule Status Review", "Review Account Status", "Confirm Customer Identifier", "Open Banking Account"];  % order is significant! Indexes are later used in the following arrays.
+
+% for every task we specify, what it requires, size of the list should be equal to amount of tasks x amount of states (1- required, 0-forbidden, -1-doesn't matter)
+input_tasks_conditions = [  
+  1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  % get coordinates
+  -1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, % retrieve data
+  -1, -1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, % analyze relation
+  1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, % build profile
+  -1, -1, -1, 1, -1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, %identify selection
+  -1, -1, -1, -1, -1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, %select type
+  -1, -1, -1, 1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, %check deposit
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, %register deposit
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, %prepare document
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, %record information
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, %propose opening
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, %schedule review
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, 1, 0, 0, 0, %review status
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, 1, 0, 0, 0, %confirm identifier
+  -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 0 %open account
+  ]; % end
+
+% for every task we specify, what is its effect, size of the list should be equal to amount of tasks x amount of states
+input_tasks_effects = [ % task adds state (1 at the third position), doesn't change any other state (-1), 0 would indicate that task removes the state
+  -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, % get coordinates
+  -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, % retrieve data
+  -1, -1, -1, -1, -1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, % analyze relation
+  -1, -1, -1, -1, -1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, % build profile
+  -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, %identify selection
+  -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, %select type
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, %check deposit
+  -1, -1, -1, -1, -1, -1, -1, -1, -1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, %register deposit
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, %prepare document
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, %record information
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1,  1, -1, -1, -1, -1, %propose opening
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, %schedule review
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, %review status
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, %confirm identifier
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1 %open account
+];
+
+% what is the starting state of the process?
+% A = not present, B = not present, C = present, S = not present 
+% You can't use the -1 here, state has to properly defined
+input_initial_state = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+% what is the goal of the process?
+% A = doesn't matter, B = doesn't matter, C = has to be present, S = doesn't matter
+input_goal_state = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1];
+
+%what is the maximum execution number of a task (0 - unlimited)
+input_tasks_executions = [
+ 1, % 
+ 1, %  
+ 1, % 
+ 1, % 
+ 1, % 
+ 1, % 
+ 1, % 
+ 1, % 
+ 1, % 
+ 1, % 
+ 1,
+ 1,
+ 1,
+ 1, % 
+ 1, %
+  ]; % end

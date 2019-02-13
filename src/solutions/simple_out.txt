@@ -1,6 +1,0 @@
-A B C
-A C B
-A B E
-A E
-E
-A C E

@@ -46,6 +46,7 @@ def process(s_0, m_tc, m_te, m_st):
 
     # solver = model.load('Gecode')
     solver = model.load('Mistral')
+    # solver = model.load('Mistral2')
 
     solver.startNewSearch()
 
@@ -84,4 +85,5 @@ def process(s_0, m_tc, m_te, m_st):
 
 if __name__ == "__main__":
     for file in listdir('problems'):
-        process_file(join('problems', file))
+        if splitext(file)[1] == '.txt':
+            process_file(join('problems', file))
