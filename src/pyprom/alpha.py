@@ -57,7 +57,6 @@ def get_direct_followers(log):
     df = []
     for trace in log:
         for index, event in enumerate(trace):
-            print(index, event)
             if index != len(trace)-1:
                 if (event, trace[index+1]) not in df:
                     df.append((event, trace[index+1]))

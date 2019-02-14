@@ -13,6 +13,7 @@
    - algorytm alpha generujący bezpośrednio diagramy BPMN
    - [COULD HAVE] ewentualnie inne algorytmy
    - PetriNet -> BPMN - Anna Kalenkova "Process mining using BPMN: event log"
+   - pm4py - zainstalowane i uruchomione w kontenerze
 1. [COULD HAVE] Generowanie logu procesu do formatu XES
    - przy użyciu biblioteki opyenxes - https://pypi.org/project/opyenxes/
 1. [MUST HAVE] Rysowanie diagramu BPMN
@@ -38,7 +39,7 @@
       - opis musi byc 
 1. Szczegóły implementacji
    1. jezyk, uzyte biblioteki, zaleznosci itp.
-   1. Silniki wnioskujące (Mistral, Gecode, etc.)
+   1. Silniki wnioskujące (Mistral, Mistral2, Gecode, OR-tools, etc.)
    1. fragmenty kodu 
    1. link do repozytorium, screen z repozytorium (z lista plikow, ew. drzewo plikow)
 1. Ewaluacja 

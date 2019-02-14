@@ -41,12 +41,12 @@ def process_file(input_file):
     
     for f in df:
         if f[0] not in direct_followers:
-            direct_followers[f[0]] = set([f[1]])
-        else:
-            direct_followers[f[0]].add(f[1])
+            direct_followers[f[0]] = set()
+        
+        direct_followers[f[0]].add(f[1])
 
-    print(causalities)
-    print(direct_followers)
+    print('causalties: ', causalities)
+    print('direct followers: ', direct_followers)
 
     graph = build_bpmn(direct_followers, causalities)
     graph.render(

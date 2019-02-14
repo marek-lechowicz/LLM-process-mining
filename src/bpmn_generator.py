@@ -65,8 +65,6 @@ def build_bpmn(direct_succession, causality):
     print("start_set_events: ",start_set_events)
 
     end_set_events = ev_target - ev_source
-    # if not end_set_events:
-    #     end_set_events = set([key for key in net if net[key] == set()])
 
     print("end_set_events: ",end_set_events)
 
