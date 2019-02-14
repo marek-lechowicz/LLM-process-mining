@@ -1,11 +1,21 @@
+import os
+
 from os import listdir, makedirs
 from os.path import join, exists, basename, splitext
 from Numberjack import *
 from utilities import *
 from workflow_generator import *
 from read_input_file import *
+from traces_to_csv import *
 from pyprom import alpha
 from bpmn_generator import build_bpmn
+
+from pm4py.algo.discovery.simple.model.log import factory as simple_miner
+from pm4py.algo.discovery.inductive import factory as inductive_miner
+from pm4py.objects.log.importer.csv import factory as csv_importer
+from pm4py.objects.petri.check_soundness import check_petri_wfnet_and_soundness
+from pm4py.objects.conversion.petri_to_bpmn import factory as bpmn_converter
+from pm4py.visualization.bpmn import factory as bpmn_vis_factory
 
 
 def process_file(input_file):
@@ -28,32 +38,47 @@ def process_file(input_file):
             file.write(' '.join(trace))
             file.write('\n')
 
-    cs, df = alpha.apply(log, '', join('solutions', name))
+    csv = convert_traces_to_csv(log)
 
-    causalities = dict()
-    direct_followers = dict()
+    event_log = csv_importer.import_log_from_string(csv)
+    # apply the simple miner
+    # net, im, fm = simple_miner.apply(log, classic_output=True)
+    net, initial_marking, final_marking = inductive_miner.apply(event_log)
 
-    for c in cs:
-        if c[0] not in causalities:
-            causalities[c[0]] = set([c[1]])
-        else:
-            causalities[c[0]].add(c[1])
+    bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(net, initial_marking, final_marking)
+
+    bpmn_figure = bpmn_vis_factory.apply(bpmn_graph)
+    # bpmn_vis_factory.view(bpmn_figure)
+    bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_bpmn.png'))
     
-    for f in df:
-        if f[0] not in direct_followers:
-            direct_followers[f[0]] = set()
+    
+    
+    # cs, df = alpha.apply(log, '', join('solutions', name))
+
+    # causalities = dict()
+    # direct_followers = dict()
+
+    # for c in cs:
+    #     if c[0] not in causalities:
+    #         causalities[c[0]] = set([c[1]])
+    #     else:
+    #         causalities[c[0]].add(c[1])
+    
+    # for f in df:
+    #     if f[0] not in direct_followers:
+    #         direct_followers[f[0]] = set()
         
-        direct_followers[f[0]].add(f[1])
+    #     direct_followers[f[0]].add(f[1])
 
-    print('causalties: ', causalities)
-    print('direct followers: ', direct_followers)
+    # print('causalties: ', causalities)
+    # print('direct followers: ', direct_followers)
 
-    graph = build_bpmn(direct_followers, causalities)
-    graph.render(
-        filename=name + '_bpmn',
-        directory='solutions',
-        format='png'
-        )
+    # graph = build_bpmn(direct_followers, causalities)
+    # graph.render(
+    #     filename=name + '_bpmn',
+    #     directory='solutions',
+    #     format='png'
+    #     )
 
 
 def process(s_0, m_tc, m_te, m_st):

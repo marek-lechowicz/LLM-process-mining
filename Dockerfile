@@ -21,7 +21,12 @@ RUN pip install -r requirements_stable.txt
 RUN python setup.py build
 RUN python setup.py install
 
-# Install thesis source
+# Install thesis dependencies
+COPY ./src/requirements.txt /thesis/src/requirements.txt
+WORKDIR /thesis/src
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
+
+# Copy thesis source
 COPY ./src /thesis
 
 # Test pm4py installation
@@ -29,8 +34,6 @@ WORKDIR /thesis/tests/
 RUN python pm4py_test.py
 RUN python pm4py_bpmn_example.py
 
-# Install thesis dependencies
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
-
 # Run processing problems
+WORKDIR /thesis/
 RUN python main.py
