@@ -10,12 +10,15 @@ from traces_to_csv import *
 from pyprom import alpha
 from bpmn_generator import build_bpmn
 
+from pm4py.algo.discovery.alpha import factory as alpha_miner
 from pm4py.algo.discovery.simple.model.log import factory as simple_miner
 from pm4py.algo.discovery.inductive import factory as inductive_miner
 from pm4py.objects.log.importer.csv import factory as csv_importer
 from pm4py.objects.petri.check_soundness import check_petri_wfnet_and_soundness
 from pm4py.objects.conversion.petri_to_bpmn import factory as bpmn_converter
 from pm4py.visualization.bpmn import factory as bpmn_vis_factory
+from pm4py.objects.bpmn.exporter import bpmn20 as bpmn_exporter
+
 
 
 def process_file(input_file):
@@ -31,7 +34,7 @@ def process_file(input_file):
     base = basename(input_file)
     name = splitext(base)[0]
 
-    output_file_name = join('solutions', name + '_out.txt')
+    output_file_name = join('solutions', name + '_log.txt')
 
     with open(output_file_name, 'w+') as file:
         for trace in log:
@@ -41,44 +44,21 @@ def process_file(input_file):
     csv = convert_traces_to_csv(log)
 
     event_log = csv_importer.import_log_from_string(csv)
-    # apply the simple miner
-    # net, im, fm = simple_miner.apply(log, classic_output=True)
-    net, initial_marking, final_marking = inductive_miner.apply(event_log)
+
+    explore_process(name, event_log, alpha_miner, 'alpha_miner')
+    explore_process(name, event_log, inductive_miner, 'inductive_miner')
+    explore_process(name, event_log, simple_miner, 'simple_miner')
+
+
+def explore_process(name, event_log, miner, miner_name):
+    net, initial_marking, final_marking = miner.apply(event_log)
 
     bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(net, initial_marking, final_marking)
 
+    bpmn_exporter.export_bpmn(bpmn_graph, join('solutions', name + '_' + miner_name + '.bpmn'))
     bpmn_figure = bpmn_vis_factory.apply(bpmn_graph)
-    # bpmn_vis_factory.view(bpmn_figure)
-    bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_bpmn.png'))
-    
-    
-    
-    # cs, df = alpha.apply(log, '', join('solutions', name))
+    bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_' + miner_name + '_bpmn.png'))
 
-    # causalities = dict()
-    # direct_followers = dict()
-
-    # for c in cs:
-    #     if c[0] not in causalities:
-    #         causalities[c[0]] = set([c[1]])
-    #     else:
-    #         causalities[c[0]].add(c[1])
-    
-    # for f in df:
-    #     if f[0] not in direct_followers:
-    #         direct_followers[f[0]] = set()
-        
-    #     direct_followers[f[0]].add(f[1])
-
-    # print('causalties: ', causalities)
-    # print('direct followers: ', direct_followers)
-
-    # graph = build_bpmn(direct_followers, causalities)
-    # graph.render(
-    #     filename=name + '_bpmn',
-    #     directory='solutions',
-    #     format='png'
-    #     )
 
 
 def process(s_0, m_tc, m_te, m_st, e_t):
