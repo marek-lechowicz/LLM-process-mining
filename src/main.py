@@ -21,9 +21,9 @@ from pm4py.visualization.bpmn import factory as bpmn_vis_factory
 def process_file(input_file):
     print(f'Processing file {input_file}')
     print()
-    s_0, m_tc, m_te, m_st = read_input_file(input_file)
+    s_0, m_tc, m_te, m_st, e_t = read_input_file(input_file)
 
-    log = process(s_0, m_tc, m_te, m_st)
+    log = process(s_0, m_tc, m_te, m_st, e_t)
 
     if not exists('solutions'):
         makedirs('solutions')
@@ -81,7 +81,7 @@ def process_file(input_file):
     #     )
 
 
-def process(s_0, m_tc, m_te, m_st):
+def process(s_0, m_tc, m_te, m_st, e_t):
     print('Initial state:')
     print(s_0)
     print('Task conditions:')
@@ -90,10 +90,12 @@ def process(s_0, m_tc, m_te, m_st):
     print(m_te)
     print('Goal states:')
     print(m_st)
+    print('Max task executions:')
+    print(e_t)
     print('----------------------------------------------------------')
 
     model, workflow_trace, process_states, last_task_index = get_model(
-        s_0, m_tc, m_te, m_st)
+        s_0, m_tc, m_te, m_st, e_t)
 
     # solver = model.load('Gecode')
     solver = model.load('Mistral')

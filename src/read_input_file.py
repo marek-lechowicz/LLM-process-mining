@@ -47,6 +47,7 @@ def read_input_file(file_name):
         m_tc = read_matrix()
         m_te = read_matrix()
         m_st = read_matrix()
+        e_t = read_line()
 
         assert len(m_tc) == len(m_te)
         for row in m_tc:
@@ -55,5 +56,6 @@ def read_input_file(file_name):
             assert len(row) == len(s_0)
         for row in m_st:
             assert len(row) == len(s_0)
+        assert len(e_t) == len(m_tc)
 
-        return (s_0, m_tc, m_te, m_st)
+        return (s_0, m_tc, m_te, m_st, e_t)

@@ -2,7 +2,7 @@ from Numberjack import *
 from utilities import *
 
 
-def get_model(s_0, m_tc, m_te, m_st):
+def get_model(s_0, m_tc, m_te, m_st, e_t):
     assert len(m_tc) == len(m_te)
     for row in m_tc:
         assert len(row) == len(s_0)
@@ -14,6 +14,8 @@ def get_model(s_0, m_tc, m_te, m_st):
     # Add dummy task at '0' position
     m_tc = [[-1 for i in range(0, len(m_tc[0]))]] + m_tc
     m_te = [[-1 for i in range(0, len(m_te[0]))]] + m_te
+
+    e_t = [0] + e_t
 
     max_executions = 2
     tasks_count = len(m_tc)
@@ -63,9 +65,13 @@ def get_model(s_0, m_tc, m_te, m_st):
     #     else count_geq(process, i, input_tasks_executions[i]) endif
     # );
 
+    # model.add([
+    #     Cardinality(workflow_trace, x) <= max_executions
+    #     for x in range(1, tasks_count)])
+
     model.add([
-        Cardinality(workflow_trace, x) <= max_executions
-        for x in range(1, tasks_count)])
+        Cardinality(workflow_trace, i) <= ( e_t[i] if (e_t[i] > 0) and (e_t[i] < max_executions) else max_executions )
+        for i in range(1, tasks_count)])
 
     
     # Last task in workflow trace shoud be dummy task
