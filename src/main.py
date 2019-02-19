@@ -18,6 +18,8 @@ from pm4py.objects.petri.check_soundness import check_petri_wfnet_and_soundness
 from pm4py.objects.conversion.petri_to_bpmn import factory as bpmn_converter
 from pm4py.visualization.bpmn import factory as bpmn_vis_factory
 from pm4py.objects.bpmn.exporter import bpmn20 as bpmn_exporter
+from pm4py.visualization.petrinet import factory as pn_vis_factory
+
 
 
 
@@ -43,22 +45,22 @@ def process_file(input_file):
 
     csv = convert_traces_to_csv(log)
 
+    explore_process(name, csv, alpha_miner, 'alpha_miner')
+    explore_process(name, csv, inductive_miner, 'inductive_miner')
+
+
+def explore_process(name, csv, miner, miner_name):
     event_log = csv_importer.import_log_from_string(csv)
 
-    explore_process(name, event_log, alpha_miner, 'alpha_miner')
-    explore_process(name, event_log, inductive_miner, 'inductive_miner')
-    explore_process(name, event_log, simple_miner, 'simple_miner')
-
-
-def explore_process(name, event_log, miner, miner_name):
     net, initial_marking, final_marking = miner.apply(event_log)
+    gviz = pn_vis_factory.apply(net, initial_marking, final_marking)
+    pn_vis_factory.save(gviz, join('solutions', name + '_' + miner_name + '_petri_net.png'))
 
     bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(net, initial_marking, final_marking)
 
     bpmn_exporter.export_bpmn(bpmn_graph, join('solutions', name + '_' + miner_name + '.bpmn'))
     bpmn_figure = bpmn_vis_factory.apply(bpmn_graph)
     bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_' + miner_name + '_bpmn.png'))
-
 
 
 def process(s_0, m_tc, m_te, m_st, e_t):
