@@ -54,13 +54,13 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
         ])
 
 
-    # Tasks should not repeat
-    # model.add(AllDiffExcept0(workflow_trace)) 
-
-
-    # Count of occurences for each task should be lower or equal to it's value from e_t or to max_executions
+    # Count of occurences for each task should be lower or equal to it's value 
+    # from e_t or to max_executions
     model.add([
-        Cardinality(workflow_trace, i) <= ( e_t[i] if (e_t[i] > 0) and (e_t[i] < max_executions) else max_executions )
+        Cardinality(workflow_trace, i) <= ( 
+            e_t[i] if (e_t[i] > 0) and (e_t[i] < max_executions) 
+            else max_executions
+            )
         for i in range(1, tasks_count)])
 
     
@@ -69,7 +69,9 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
 
 
     # First state should be equal to the defined state
-    model.add([process_states[0, i] == s_0[i] for i in range(0, data_entities_count)])
+    model.add([
+        process_states[0, i] == s_0[i]
+        for i in range(0, data_entities_count)])
 
     
     # The last task index should not be preceeded by any idle task
@@ -77,15 +79,22 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
     def constraint_idle_tasks(i):
         return (last_task_index <= i) == (workflow_trace[i] == 0)
 
-    model.add([constraint_idle_tasks(i) for i in range(0, max_workflow_trace_count)])
+    model.add([
+        constraint_idle_tasks(i)
+        for i in range(0, max_workflow_trace_count)])
 
 
     # End process when any desired goal is achieved
     def process_should_end(i):
         state = process_states[i]
-        return state_satisfies_requirements_set(state, m_st) == (workflow_trace[i] == 0)
+        return (
+            state_satisfies_requirements_set(state, m_st) == 
+            (workflow_trace[i] == 0)
+        )
                 
-    model.add([process_should_end(i) for i in range(0, max_workflow_trace_count)])
+    model.add([
+        process_should_end(i) 
+        for i in range(0, max_workflow_trace_count)])
 
 
     # The last state of the process should satisfy any desired goal
@@ -100,10 +109,13 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
         conditions = m_tc_var[task]
         return state_satisfies_requirements(state, conditions)
 
-    model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
+    model.add([
+        task_condition_check(i)
+        for i in range(0, max_workflow_trace_count)])
 
 
-    # Every state has to be changed according to the executed task, otherwise it should not change 
+    # Every state has to be changed according to the executed task,
+    # otherwise it should not change 
     def constraint_next_state(i):
         task = workflow_trace[i]
         state = process_states[i]
@@ -129,7 +141,9 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
             for s in range(0, data_entities_count)
         ])
 
-    model.add([constraint_next_state(i) for i in range(0, max_workflow_trace_count - 1)])    
+    model.add([
+        constraint_next_state(i) 
+        for i in range(0, max_workflow_trace_count - 1)])    
 
 
     return (
