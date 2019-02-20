@@ -51,7 +51,7 @@ def problem_as_text(s_0, m_tc, m_te, m_st, e_t):
         '# e_t',
         '\n',
         ', '.join(map(str, e_t))
-        ])
+    ])
 
 
 if __name__ == "__main__":

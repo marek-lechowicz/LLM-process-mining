@@ -6,7 +6,6 @@ def convert_traces_to_csv(traces):
     for trace_idx, trace in enumerate(traces):
         for entry_idx, entry in enumerate(trace):
             csv.append(f'{trace_idx},"{entry}"')
-
     return '\n'.join(csv)
 
 
@@ -36,14 +35,3 @@ def get_task_names(input_file, task_count):
     else:
         return [chr(65 + i) for i in range(0, task_count)] # [A, B, C, ... ]
 
-
-
-if __name__ == '__main__':
-    traces = [
-        ['A', 'B', 'C', 'E'],
-        ['A', 'C', 'B', 'E'],
-        ['A', 'D', 'E']
-    ]
-
-    csv = convert_traces_to_csv(traces)
-    print(csv)

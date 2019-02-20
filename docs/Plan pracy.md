@@ -1,26 +1,5 @@
 # Plan pracy
 
-## Projekt - Done:
-
-1. Generator workflow log
-
-## Projekt - ToDo:
-
-1. [MUST HAVE] Testy doświadczalne generatora workflow log
-   - więcej przykładów danych wejściowych
-1. [MUST HAVE] Process mining
-   - zastosowanie algorytmu alpha - https://github.com/harrywang/pyprom
-   - algorytm alpha generujący bezpośrednio diagramy BPMN
-   - [COULD HAVE] ewentualnie inne algorytmy
-   - PetriNet -> BPMN - Anna Kalenkova "Process mining using BPMN: event log"
-   - pm4py - zainstalowane i uruchomione w kontenerze
-1. [COULD HAVE] Generowanie logu procesu do formatu XES
-   - przy użyciu biblioteki opyenxes - https://pypi.org/project/opyenxes/
-1. [MUST HAVE] Rysowanie diagramu BPMN
-   - korzystając z biblioteki https://github.com/KrzyHonk/bpmn-python
-1. [SHOULD HAVE] Interfejs CLI
-1. [COULD HAVE] Obrazy dockera z zainstalowanymi zależnościami projektu
-
 ## Praca:
 
 1. Opis problemu, motywacja (do czego to sluzy), struktura pracy
@@ -71,3 +50,8 @@ rysunki \label -> \ref
    - AND
 1. Aktywności
 1. Start / Stop
+
+
+
+Brakujące elementy
+
