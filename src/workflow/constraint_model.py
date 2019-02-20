@@ -55,149 +55,55 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
 
 
     # Tasks should not repeat
-    model.add(AllDiffExcept0(workflow_trace)) 
+    # model.add(AllDiffExcept0(workflow_trace)) 
 
 
-    # Count of occurences for each task should be lower or equal to max_executions
-    # constraint forall(i in 1..num_of_tasks)(
-    #   if (input_tasks_executions[i] == 0 \/ input_tasks_executions[i] > max_execution_number) then
-    #     count_geq(process, i, max_execution_number)
-    #     else count_geq(process, i, input_tasks_executions[i]) endif
-    # );
-
-    # model.add([
-    #     Cardinality(workflow_trace, x) <= max_executions
-    #     for x in range(1, tasks_count)])
-
+    # Count of occurences for each task should be lower or equal to it's value from e_t or to max_executions
     model.add([
         Cardinality(workflow_trace, i) <= ( e_t[i] if (e_t[i] > 0) and (e_t[i] < max_executions) else max_executions )
         for i in range(1, tasks_count)])
 
     
     # Last task in workflow trace shoud be dummy task
-    # constraint process[last_process_index] = dummy_task;
-
     model.add(workflow_trace[max_workflow_trace_count - 1] == 0)
 
 
     # First state should be equal to the defined state
-    # constraint forall(i in state_indexes)(
-    #   process_states[first_process_index, i] == start_state[i]
-    # );
-    model.add([
-        process_states[0, i] == s_0[i]
-        for i in range(0, data_entities_count)])
+    model.add([process_states[0, i] == s_0[i] for i in range(0, data_entities_count)])
 
     
     # The last task index should not be preceeded by any idle task
     # also all tasks after it should be idle
-    # constraint count_neq(process, dummy_task, last_task_index); %consider last_process_index here
-    # constraint forall(i in process_indexes)(
-    #   if i > last_task_index then process[i] == dummy_task
-    #   else process[i] != dummy_task endif
-    # );
-
     def constraint_idle_tasks(i):
-        return (
-            (last_task_index <= i) == (workflow_trace[i] == 0)
-            
-            # ( (i <= last_task_index) | (workflow_trace[i] == 0) )
-            # &
-            # ( (i > last_task_index) | (workflow_trace[i] != 0) )
-        )
+        return (last_task_index <= i) == (workflow_trace[i] == 0)
 
-    model.add([
-        constraint_idle_tasks(i)
-        for i in range(0, max_workflow_trace_count)
-    ])
+    model.add([constraint_idle_tasks(i) for i in range(0, max_workflow_trace_count)])
 
 
-    # End process when the first (desired) goal is achieved - REVISED 2 times for short processes
-    # constraint forall(i in process_indexes)(
-    #   let {
-    #     array[state_indexes] of var 0..1: state = [process_states[i,s] | s in state_indexes]
-    #   } in
-    #   state_satisfies_requirements(state, row(goal_states,1)) ->last_task_index < i+2 %corrected to i+2
-    # );
-    #
-    # UWAGA: row(goal_states,1) wybiera jeden wiersz(?), czy nie powinna być tutaj przekazana cała macierz
-    # dozwolonych stanów końcowych?
-
-    # 6. The process should end when the desired goal state is achieved.
-    # state_satisfies_requirements_set <=> (trace == 0)
-
+    # End process when any desired goal is achieved
     def process_should_end(i):
         state = process_states[i]
         return state_satisfies_requirements_set(state, m_st) == (workflow_trace[i] == 0)
                 
-    model.add([process_should_end(i)
-               for i in range(0, max_workflow_trace_count)])
+    model.add([process_should_end(i) for i in range(0, max_workflow_trace_count)])
 
 
-    # The states beggining from last_task_index + 1 shouldn't change 
-    # constraint forall(i in 2..last_process_index)(
-    #   (i > last_task_index + 1) 
-    # -> 
-    #   forall(s in state_indexes)(
-    #      process_states[i, s] == process_states[i-1, s]
-    #   )
-    # );
-    # UWAGA: jak na razie z empirycznych testów wychodzi, że to ograniczenie jest nadmiarowe
-
-    def last_index_constraint(i):
-        trace = workflow_trace[i]
-        # if trace == 0:
-        #   Conjunction([workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])  
-        return (trace != 0) | Conjunction(
-            [workflow_trace[j] == 0 for j in range(i + 1, max_workflow_trace_count)])
-        
-    # model.add([last_index_constraint(i)
-    #            for i in range(0, max_workflow_trace_count - 1)])
-
-
-    # Last state should satisfy goal state
-    # array[state_indexes] of var 0..1: last_state = [process_states[last_process_index, s] | s in state_indexes];
-    # constraint state_satisfies_requirements_set(last_state, goal_states);
-
-    # The last state of the process should satisfy one of the goal states.
+    # The last state of the process should satisfy any desired goal
     last_state = process_states[max_workflow_trace_count - 1]
     model.add(state_satisfies_requirements_set(last_state, m_st))
 
 
     # Every task can be only executed when state satisfies its conditions
-    # constraint forall(i in process_indexes)(
-    #   let {
-    #     var tasks_indexes: task = process[i],
-    #     array[state_indexes] of var 0..1: state = [process_states[i,s] | s in state_indexes] ,
-    #     array[state_indexes] of var -1..1: conditions = [tasks_conditions[task,s] | s in state_indexes] 
-    #   } in
-    #   state_satisfies_requirements(state, conditions)
-    # );
-
     def task_condition_check(i):
         task = workflow_trace[i]
         state = process_states[i]
         conditions = m_tc_var[task]
         return state_satisfies_requirements(state, conditions)
 
-    model.add([task_condition_check(i)
-               for i in range(0, max_workflow_trace_count)])
+    model.add([task_condition_check(i) for i in range(0, max_workflow_trace_count)])
 
 
-    # Every state has to be changed according to the executed task, otherwise it should not change (frame problem)
-    # constraint forall(i in real_tasks_indexes)(
-    #   let {
-    #     var tasks_indexes: task = process[i],
-    #     array[state_indexes] of var 0..1: state = [process_states[i,s] | s in state_indexes],
-    #     array[state_indexes] of var 0..1: next_state = [process_states[i+1,s] | s in state_indexes],
-    #     array[state_indexes] of var -1..1: effects = [tasks_effects[task,s] | s in state_indexes] 
-    #   } in
-    #   forall(s in state_indexes)(
-    #     if effects[s] == -1 then next_state[s] == state[s]
-    #     else next_state[s] == effects[s] endif
-    #   )
-    # );
-
+    # Every state has to be changed according to the executed task, otherwise it should not change 
     def constraint_next_state(i):
         task = workflow_trace[i]
         state = process_states[i]
@@ -223,8 +129,7 @@ def get_model(s_0, m_tc, m_te, m_st, e_t):
             for s in range(0, data_entities_count)
         ])
 
-    model.add([constraint_next_state(i)
-               for i in range(0, max_workflow_trace_count - 1)])    
+    model.add([constraint_next_state(i) for i in range(0, max_workflow_trace_count - 1)])    
 
 
     return (
