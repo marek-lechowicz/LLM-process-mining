@@ -3,7 +3,7 @@ def convert_traces_to_csv(traces):
     csv.append('case:concept:name,concept:name')
     for trace_idx, trace in enumerate(traces):
         for entry_idx, entry in enumerate(trace):
-            csv.append(f'{trace_idx},{entry}')
+            csv.append(f'{trace_idx},"{entry}"')
 
     return '\n'.join(csv)
 

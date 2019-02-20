@@ -1,7 +1,7 @@
 import os
 
 from os import listdir, makedirs
-from os.path import join, exists, basename, splitext
+from os.path import join, exists, basename, splitext, dirname
 from Numberjack import *
 from utilities import *
 from workflow_generator import *
@@ -28,7 +28,11 @@ def process_file(input_file):
     print()
     s_0, m_tc, m_te, m_st, e_t = read_input_file(input_file)
 
-    log = process(s_0, m_tc, m_te, m_st, e_t)
+    task_names = get_task_names(input_file, len(m_tc))
+
+    workflow_log = get_workflow_log(s_0, m_tc, m_te, m_st, e_t)
+
+    log = name_tasks(workflow_log, task_names)
 
     if not exists('solutions'):
         makedirs('solutions')
@@ -36,14 +40,26 @@ def process_file(input_file):
     base = basename(input_file)
     name = splitext(base)[0]
 
-    output_file_name = join('solutions', name + '_log.txt')
+    log_output_file_name = join('solutions', name + '_log.txt')
 
-    with open(output_file_name, 'w+') as file:
-        for trace in log:
-            file.write(' '.join(trace))
-            file.write('\n')
+    output_log = []
+    for trace in log:
+        quoted_trace = map(lambda x: '"' + x + '"', trace)
+        comma_separated_trace = ', '.join(quoted_trace)
+        output_log.append(comma_separated_trace)
+    
+    output_log.sort()
+
+    with open(log_output_file_name, 'w+') as file:
+        file.write('\n'.join(output_log))
+        
 
     csv = convert_traces_to_csv(log)
+
+    csv_log_output_file_name = join('solutions', name + '_log.csv')
+
+    with open(csv_log_output_file_name, 'w+') as file:
+        file.write(csv)
 
     explore_process(name, csv, alpha_miner, 'alpha_miner')
     explore_process(name, csv, inductive_miner, 'inductive_miner')
@@ -55,15 +71,17 @@ def explore_process(name, csv, miner, miner_name):
     net, initial_marking, final_marking = miner.apply(event_log)
     gviz = pn_vis_factory.apply(net, initial_marking, final_marking)
     pn_vis_factory.save(gviz, join('solutions', name + '_' + miner_name + '_petri_net.png'))
+    pn_vis_factory.save(gviz, join('solutions', name + '_' + miner_name + '_petri_net.pdf'))
 
     bpmn_graph, elements_correspondence, inv_elements_correspondence, el_corr_keys_map = bpmn_converter.apply(net, initial_marking, final_marking)
 
     bpmn_exporter.export_bpmn(bpmn_graph, join('solutions', name + '_' + miner_name + '.bpmn'))
     bpmn_figure = bpmn_vis_factory.apply(bpmn_graph)
     bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_' + miner_name + '_bpmn.png'))
+    bpmn_vis_factory.save(bpmn_figure, join('solutions', name + '_' + miner_name + '_bpmn.pdf'))
 
 
-def process(s_0, m_tc, m_te, m_st, e_t):
+def get_workflow_log(s_0, m_tc, m_te, m_st, e_t):
     print('Initial state:')
     print(s_0)
     print('Task conditions:')
@@ -79,43 +97,58 @@ def process(s_0, m_tc, m_te, m_st, e_t):
     model, workflow_trace, process_states, last_task_index = get_model(
         s_0, m_tc, m_te, m_st, e_t)
 
-    # solver = model.load('Gecode')
     solver = model.load('Mistral')
     # solver = model.load('Mistral2')
 
     solver.startNewSearch()
 
-    solutions = []
+    workflow_log = []
 
-    print('Solutions:')
-    print('==========')
+    print('Workflow traces:')
+    print('================')
     while solver.getNextSolution() == SAT:
         print(workflow_trace)
         print(process_states)
         print(last_task_index)
-        solutions.append((
+        workflow_log.append((
             VarArray_to_list(workflow_trace),
             Matrix_to_list(process_states),
             last_task_index.get_value()))
         print('----------')
 
     print()
-    print(f'Solutions count: {len(solutions)}')
+    print(f'Workflow trace count: {len(workflow_log)}')
     print('==========================================================')
     print()
 
-    log = []
-    for s in solutions:
+    return workflow_log
+
+
+def name_tasks(log, task_names):
+    task_names = ['dummy'] + task_names
+    log_with_named_tasks = []
+    for s in log:
         trace, _, last = s
         trace = trace[0:last]
-        trace = list(map(lambda x: chr(64 + x), trace))
-        log.append(trace)
+        trace = list(map(lambda x: task_names[x], trace))
+        log_with_named_tasks.append(trace)
         print(trace)
+    return log_with_named_tasks
 
-    print()
-    print()
 
-    return log
+def get_task_names(input_file, task_count):
+    base = basename(input_file)
+    name = splitext(base)[0]
+    directory = dirname(input_file)
+    task_names_file = join(directory, name + '.task_names')
+    if exists(task_names_file):
+        with open(task_names_file) as file:
+            file_contents = file.read().splitlines()
+            file_contents = list(map(lambda line: line.strip(), file_contents))
+            assert len(file_contents) == task_count
+            return file_contents
+    else:
+        return [chr(65 + i) for i in range(0, task_count)] # [A, B, C, ... ]
 
 
 if __name__ == "__main__":
