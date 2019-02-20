@@ -4,7 +4,8 @@ from os import listdir, makedirs
 from os.path import join, exists, basename, splitext, dirname
 
 from workflow.generator import get_workflow_log
-from utils import get_task_names, name_tasks, convert_traces_to_csv, 
+from process_discovery.code import explore_process
+from utils import get_task_names, name_tasks, convert_traces_to_csv
 from parser import *
 
 from pm4py.algo.discovery.alpha import factory as alpha_miner

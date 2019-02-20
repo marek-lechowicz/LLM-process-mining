@@ -14,6 +14,7 @@ RUN apt-get install -y python-dev swig libxml2-dev zlib1g-dev libgmp-dev
 RUN pip install Numberjack
 
 # Install pm4py
+# clone branch with BPMN implementation - it may require changes when branch is merged to master
 RUN git clone --single-branch --branch bpmnIntegration2 --depth 1 https://github.com/pm4py/pm4py-source.git
 WORKDIR /pm4py-source/
 RUN pip install -r requirements_stable.txt
@@ -27,11 +28,6 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Copy thesis source
 COPY ./src /thesis
-
-# Test pm4py installation
-# WORKDIR /thesis/tests/
-# RUN python pm4py_test.py
-# RUN python pm4py_bpmn_example.py
 
 # Run processing problems
 WORKDIR /thesis/

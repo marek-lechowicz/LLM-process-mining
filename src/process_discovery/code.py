@@ -1,3 +1,5 @@
+from os.path import join
+
 from pm4py.objects.log.importer.csv import factory as csv_importer
 from pm4py.objects.conversion.petri_to_bpmn import factory as bpmn_converter
 from pm4py.visualization.bpmn import factory as bpmn_vis_factory

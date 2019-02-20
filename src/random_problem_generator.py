@@ -1,6 +1,6 @@
 import random
-from main import process
 from os.path import join
+from workflow.generator import get_workflow_log
 
 
 def random_list(start, stop, length):
@@ -21,6 +21,8 @@ def generate_random_problem(tasks_count, data_entities_count, final_states_count
                 continue
         break
 
+    e_t = list(map(lambda x: 1, m_tc))
+
     assert len(m_tc) == len(m_te)
 
     for row in m_tc:
@@ -30,10 +32,10 @@ def generate_random_problem(tasks_count, data_entities_count, final_states_count
     for row in m_st:
         assert len(row) == len(s_0)
 
-    return (s_0, m_tc, m_te, m_st)
+    return (s_0, m_tc, m_te, m_st, e_t)
 
 
-def problem_as_text(s_0, m_tc, m_te, m_st, traces):
+def problem_as_text(s_0, m_tc, m_te, m_st, e_t):
     return '\n'.join([
         '# s_0',
         ', '.join(map(str, s_0)),
@@ -45,20 +47,22 @@ def problem_as_text(s_0, m_tc, m_te, m_st, traces):
         '\n'.join([', '.join(map(str, row)) for row in m_te]),
         '\n',
         '# m_st',
-        '\n'.join([', '.join(map(str, row)) for row in m_st])
+        '\n'.join([', '.join(map(str, row)) for row in m_st]),
+        '# e_t',
+        '\n',
+        ', '.join(map(str, e_t))
         ])
 
 
 if __name__ == "__main__":
     problems = []
     while len(problems) < 5:
-        s_0, m_tc, m_te, m_st = generate_random_problem(6, 5, 3)
-        traces = process(s_0, m_tc, m_te, m_st)
-        if len(traces) > 1:
-            problem = (s_0, m_tc, m_te, m_st, traces)
+        s_0, m_tc, m_te, m_st, e_t = generate_random_problem(6, 5, 3)
+        traces = get_workflow_log(s_0, m_tc, m_te, m_st, e_t)
+        if len(traces) > 3:
+            problem = (s_0, m_tc, m_te, m_st, e_t)
             problems.append(problem)
             print(problem)
-            break
 
     for p in problems:
         problem_text = problem_as_text(*p)
