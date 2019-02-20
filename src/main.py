@@ -56,8 +56,6 @@ def process_file(input_file):
 
 
 
-
-
 if __name__ == "__main__":
     for file in listdir('problems'):
         if splitext(file)[1] == '.txt':
