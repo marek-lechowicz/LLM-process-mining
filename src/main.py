@@ -6,10 +6,10 @@ from os.path import join, exists, basename, splitext, dirname
 from workflow.generator import get_workflow_log
 from process_discovery.code import explore_process
 from utils import get_task_names, name_tasks, convert_traces_to_csv
-from parser import *
+from read_input_file import *
 
-from pm4py.algo.discovery.alpha import factory as alpha_miner
-from pm4py.algo.discovery.inductive import factory as inductive_miner
+from pm4py.algo.discovery.alpha import algorithm as alpha_miner
+from pm4py.algo.discovery.inductive import algorithm as inductive_miner
 
 
 def process_file(input_file):
@@ -51,8 +51,8 @@ def process_file(input_file):
     with open(csv_log_output_file_name, 'w+') as file:
         file.write(csv)
 
-    explore_process(name, csv, alpha_miner, 'alpha_miner')
-    explore_process(name, csv, inductive_miner, 'inductive_miner')
+    explore_process(name, csv_log_output_file_name, alpha_miner, 'alpha_miner')
+    explore_process(name, csv_log_output_file_name, inductive_miner, 'inductive_miner')
 
 
 

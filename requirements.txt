@@ -1,0 +1,4 @@
+cvxopt
+numberjack==1.2.0
+graphviz==0.10.1
+bpmn_python==0.0.18

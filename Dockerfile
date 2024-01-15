@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.7
 ENV PYTHONUNBUFFERED 1
 ENV USING_DOCKER 1
 
@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt-get install -y libgraphviz-dev graphviz
 
 # The next line enables to build NumberJack
-RUN apt-get install -y python-dev swig libxml2-dev zlib1g-dev libgmp-dev
+RUN apt-get install -y python-dev-is-python3 swig libxml2-dev zlib1g-dev libgmp-dev
 
 # Numberjack is very slow to install,
 # It has its own Docker file, line so changes in other lines don't reinstall it.
@@ -15,9 +15,9 @@ RUN pip install Numberjack
 
 # Install pm4py
 # clone branch with BPMN implementation - it may require changes when branch is merged to master
-RUN git clone --single-branch --branch bpmnIntegration2 --depth 1 https://github.com/pm4py/pm4py-source.git
+RUN git clone https://github.com/pm4py/pm4py-source.git
 WORKDIR /pm4py-source/
-RUN pip install -r requirements_stable.txt
+RUN pip install -r requirements.txt
 RUN python setup.py build
 RUN python setup.py install
 
