@@ -1,0 +1,59 @@
+%hIRING PROCESS FOR EVALUATION
+
+input_states_names = ["a", "b", "c", "d", "e", "f", "g"]; 
+% order is significant! Indexes are later used in the following arrays.
+%input_tasks_names = ["A-Request New Employee", "B-Receive Applications", "C-Make Decision", "D-Ask For Confirmation", "E-Report Employee", "F-Confirm Access to IT Systems", "G-Prepare New Hardware"]; 
+input_tasks_names = ["A", "B", "C", "D", "E", "F", "G"]; 
+% order is significant! Indexes are later used in the following arrays.
+
+% for every task we specify, what it requires, size of the list should be equal to amount of tasks x amount of states (1- required, 0-forbidden, -1-doesn't matter)
+
+%if there is a need for one of tasks to be present then create a dummy data entity, e.g. jk = j OR k, TODO: last part of effects
+input_tasks_conditions = [  
+%  a   b   c   d   e   f   g  
+   0,  0,  0,  0,  0,  0,  0, % A
+   1,  0, -1, -1,  0,  0,  0, % B
+   1,  1,  0,  0,  0,  0,  0, % C
+   1, -1,  1,  0,  0,  0,  0, % D
+   1, -1,  1,  1,  0, -1, -1, % E
+   1, -1,  1,  1, -1,  0, -1, % F
+   1, -1,  1,  1, -1, -1,  0  % G
+  ]; % end
+
+% for every task we specify, what is its effect, size of the list should be equal to amount of tasks x amount of states
+input_tasks_effects = [ 
+% task adds state (1), doesn't change any other state (-1), 0 would indicate that task removes the state
+%  a   b   c   d   e   f   g 
+   1, -1, -1, -1, -1, -1, -1, % A
+  -1,  1,  0,  0, -1, -1, -1, % B
+  -1,  0,  1, -1, -1, -1, -1, % C
+  -1,  0, -1,  1, -1, -1, -1, % D
+  -1, -1, -1, -1,  1, -1, -1, % E
+  -1, -1, -1, -1, -1,  1, -1, % F
+  -1, -1, -1, -1, -1, -1,  1  % G
+  ]; % end
+
+% what is the starting state of the process?
+% 0 = not present, 1 = present
+% You can't use the -1 here, state has to properly defined
+%                        a   b   c   d   e   f   g  
+input_initial_state = [  0,  0,  0,  0,  0,  0,  0];
+
+% what is the goal of the process?
+% -1 = doesn't matter, 1 = has to be present
+%                     a   b   c   d   e   f   g  
+input_goal_state = [ -1, -1, -1, -1,  1,  1,  1];%, %goal
+                    %  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]; %error
+
+                    
+                  
+%what is the maximum execution number of a task (0 - unlimited)
+input_tasks_executions = [
+ 1, % A
+ 3, % B
+ 3, % C
+ 2, % D
+ 1, % E
+ 1, % F
+ 1 % G
+  ]; % end

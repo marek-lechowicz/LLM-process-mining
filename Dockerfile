@@ -31,4 +31,4 @@ COPY ./src /thesis
 
 # Run processing problems
 WORKDIR /thesis/
-RUN python main.py
+CMD ["python", "main.py"]
