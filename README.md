@@ -1,3 +1,7 @@
+# Automatic creating and updating lists of tasks for process discovery
+
+Project is based on thesis of tpaszun - https://github.com/tpaszun/thesis/
+
 If you want to generate a BPMN/Petri Net diagram of a given problem
 put the problem description files (.txt with matrices and .task_names) 
 inside the src/probelms directory.
